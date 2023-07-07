@@ -1,7 +1,8 @@
 package com.subu.jjapcript;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Compiler {
     public static void compile(String code) {
@@ -10,6 +11,9 @@ public class Compiler {
 
     public static ArrayList<Jjapcript> splitCode(String code) {
         ArrayList<Jjapcript> codes = new ArrayList<>();
+        findTypes("Command", code).forEach((key, value) -> {
+
+        });
         return codes;
     }
 
@@ -26,5 +30,18 @@ public class Compiler {
             newlines.add(line.replaceFirst("^( {4}|\\t)", ""));
         }
         return newlines;
+    }
+
+    public static Map<String, String> findTypes(String type, String input) {
+        Map<String, String> commands = new HashMap<>();
+        Pattern pattern = Pattern.compile(type + " \\{[^}]*?}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            String command = matcher.group();
+            String key = command.substring(command.indexOf('(') + 1, command.indexOf(')')).trim();
+            String value = command.substring(command.indexOf('{') + 1, command.length() - 1);
+            commands.put(key, value);
+        }
+        return commands;
     }
 }
