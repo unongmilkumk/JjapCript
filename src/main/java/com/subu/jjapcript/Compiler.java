@@ -11,9 +11,8 @@ public class Compiler {
 
     public static ArrayList<Jjapcript> splitCode(String code) {
         ArrayList<Jjapcript> codes = new ArrayList<>();
-        findTypes("Command", code).forEach((key, value) -> {
-
-        });
+        findTypes("Command", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.COMMAND, key, value)));
+        findTypes("Event", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, value)));
         return codes;
     }
 
@@ -34,7 +33,7 @@ public class Compiler {
 
     public static Map<String, String> findTypes(String type, String input) {
         Map<String, String> commands = new HashMap<>();
-        Pattern pattern = Pattern.compile(type + " \\{[^}]*?}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile(type + " \\( [^)]* \\) \\{[^}]*?}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(input);
         while (matcher.find()) {
             String command = matcher.group();
