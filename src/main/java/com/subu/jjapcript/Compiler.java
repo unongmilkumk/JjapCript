@@ -1,18 +1,40 @@
 package com.subu.jjapcript;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Compiler {
     public static void compile(String code) {
-
+        ArrayList<Jjapcript> jjapcripts = splitCode(code);
+        for (Jjapcript jjapcript : jjapcripts) {
+            if (jjapcript.compileType.equals(CompileType.COMMAND)) {
+                Main.cm.register(jjapcript.text1.replaceFirst("/", ""), new Command(jjapcript.text1.replaceFirst("/", "")) {
+                    @Override
+                    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+                        Bukkit.getLogger().info("Flies does");
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
+    /**
+     * Split Code to Compile Easier
+     * @param code Code to split
+     * @return Separated Code
+     * @since version 0.1
+     */
     public static ArrayList<Jjapcript> splitCode(String code) {
         ArrayList<Jjapcript> codes = new ArrayList<>();
-        findTypes("Command", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.COMMAND, key, value)));
-        findTypes("Event", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, value)));
+        findTypes("Command", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.COMMAND, key, removeTab(value))));
+        findTypes("Event", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, removeTab(value))));
+        findTypes("Loop", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, removeTab(value))));
         return codes;
     }
 
@@ -22,15 +44,22 @@ public class Compiler {
      * @return removed code
      * @since version 0.1
      */
-    public static ArrayList<String> removeTab(String code) {
+    public static String removeTab(String code) {
         ArrayList<String> lines = (ArrayList<String>) Arrays.stream(code.split("\n")).toList();
-        ArrayList<String> newlines = new ArrayList<>();
+        StringBuilder news = new StringBuilder();
         for (String line : lines) {
-            newlines.add(line.replaceFirst("^( {4}|\\t)", ""));
+            news.append(line.replaceFirst("^( {4}|\\t)", ""));
         }
-        return newlines;
+        return news.toString();
     }
 
+    /**
+     * Find types at the code and map it
+     * @param type Which to find at the code
+     * @param input Code that Find types and map
+     * @return Mapped Code
+     * @since version 0.1
+     */
     public static Map<String, String> findTypes(String type, String input) {
         Map<String, String> commands = new HashMap<>();
         Pattern pattern = Pattern.compile(type + " \\( [^)]* \\) \\{[^}]*?}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);

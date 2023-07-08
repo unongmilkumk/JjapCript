@@ -4,17 +4,25 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
-import java.io.File;
+
+import java.io.*;
 import java.util.ArrayList;
 
 public final class Main extends JavaPlugin {
+    public static SimpleCommandMap cm;
 
     @Override
     public void onEnable() {
-        File dataFolder = new File("dataFile");
-        ArrayList<File> jjcFiles = getJJCFiles(dataFolder);
+        cm = getCommandMap();
+        if (!getDataFolder().exists()) {
+            getDataFolder().mkdir();
+        }
+        ArrayList<File> jjcFiles = getJJCFiles(getDataFolder());
+        for (File jjcFile : jjcFiles) {
+            Compiler.compile(readFileToString(jjcFile));
+        }
 
-        getCommandMap().register("flies", new Command("flies") {
+        getCommandMap().register("flys", new Command("flys") {
             @Override
             public boolean execute(CommandSender sender, String commandLabel, String[] args) {
                 getLogger().info("Flies does");
@@ -61,5 +69,27 @@ public final class Main extends JavaPlugin {
         }
 
         return jjcFiles;
+    }
+
+    /**
+     * Reads a file and returns its contents as a string.
+     *
+     * @param file the file to be read
+     * @return the content of the file as a single string, with each line separated by line separator
+     * @since version 0.1
+     */
+    public static String readFileToString(File file) {
+        StringBuilder fileContent = new StringBuilder();
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                fileContent.append(line).append(System.lineSeparator());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return fileContent.toString();
     }
 }
