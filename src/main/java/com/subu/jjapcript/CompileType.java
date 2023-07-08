@@ -4,5 +4,6 @@ public enum CompileType {
     COMMAND,
     EVENT,
     LOOP,
-    NON_TAB
+    NON_TAB,
+    EXPRESSION
 }

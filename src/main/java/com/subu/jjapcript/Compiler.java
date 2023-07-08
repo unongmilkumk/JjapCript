@@ -35,6 +35,8 @@ public class Compiler {
         findTypes("Command", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.COMMAND, key, removeTab(value))));
         findTypes("Event", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, removeTab(value))));
         findTypes("Loop", code).forEach((key, value) -> codes.add(new Jjapcript(CompileType.EVENT, key, removeTab(value))));
+        findExpression(code).forEach(value -> codes.add(new Jjapcript(CompileType.EXPRESSION, "", removeTab(value))));
+
         return codes;
     }
 
@@ -71,5 +73,20 @@ public class Compiler {
             commands.put(key, value);
         }
         return commands;
+    }
+    /**
+     * Find expression at the code and list it
+     * @param input Code that Find expression and list
+     * @return Listed Code
+     * @since version 0.1
+     */
+    public static ArrayList<String> findExpression(String input) {
+        ArrayList<String> strings = new ArrayList<>();
+        input.lines().forEach(line -> {
+            if (line.startsWith("#")) {
+                strings.add(line);
+            }
+        });
+        return strings;
     }
 }
