@@ -1,5 +1,6 @@
 package com.subu.jjapcript;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
@@ -19,6 +20,7 @@ public final class Main extends JavaPlugin {
         }
         ArrayList<File> jjcFiles = getJJCFiles(getDataFolder());
         for (File jjcFile : jjcFiles) {
+            getLogger().info("Find JJCFILE");
             Compiler.compile(readFileToString(jjcFile));
         }
 
@@ -60,7 +62,9 @@ public final class Main extends JavaPlugin {
 
         if (files != null) {
             for (File file : files) {
-                if (file.isFile() && file.getName().endsWith(".jjc")) {
+                Bukkit.getLogger().info("File name " + file.getName());
+                if (file.isFile() && file.getName().endsWith(".jjp")) {
+                    Bukkit.getLogger().info("File Can Do!");
                     jjcFiles.add(file);
                 } else if (file.isDirectory()) {
                     jjcFiles.addAll(getJJCFiles(file));
