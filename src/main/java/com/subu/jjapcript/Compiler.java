@@ -1,6 +1,7 @@
 package com.subu.jjapcript;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -97,6 +98,15 @@ public class Compiler {
         } else if (value.startsWith("send")) {
             Player player = Bukkit.getPlayer(value.split(" ")[1]);
             player.sendMessage(value.replaceFirst("send " + value.split(" ")[1] + " ", ""));
+        } else if (value.startsWith("teleport")) {
+            Player player = Bukkit.getPlayer(value.split(" ")[1]);
+            if (value.contains(" :location ") && value.split(" :location ")[1].contains(";")) {
+                String[] locData = value.split(" :location ")[1].split(";")[0].split(" ");
+                player.teleport(new Location(Bukkit.getWorld(locData[1]), Integer.parseInt(locData[2]),
+                        Integer.parseInt(locData[3]), Integer.parseInt(locData[4])));
+            } else if (value.contains(" :target ") && value.split(" :target ")[1].contains(";")) {
+                player.teleport(Bukkit.getPlayer(value.split(" :target ")[1].split(";")[0]));
+            }
         }
     }
 
