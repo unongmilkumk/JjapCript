@@ -1,8 +1,12 @@
 package com.subu.jjapcript;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -21,6 +25,24 @@ public class Compiler {
                         findExpression(jjapcript.code).forEach(value -> {
                             if (value.startsWith("log ")) {
                                 Bukkit.getLogger().info(value.replaceFirst("log ", ""));
+                            } else if (value.startsWith("give ")) {
+                                Player player = null;
+                                if (!value.split(" ")[1].equals("=sender")) {
+                                    player = Bukkit.getPlayer(value.split(" ")[1]);
+                                } else if (sender instanceof Player) {
+                                    player = (Player) sender;
+                                }
+                                ItemStack togive = new ItemStack(Material.getMaterial(value.split(" ")[2]));
+                                ItemMeta tgm = togive.getItemMeta();
+                                if (value.contains(" :name ") && value.split(" :name ")[1].contains(";")) {
+                                    tgm.setDisplayName(value.split(" :name ")[1].split(";")[0]);
+                                } else if (value.contains(" :description ") && value.split(" :description ")[1].contains(";")) {
+                                    tgm.setLore(List.of(value.split(" :description ")[1].split(";")[0]));
+                                } else if (value.contains(" :lore ") && value.split(" :lore ")[1].contains(";")) {
+                                    tgm.setLore(List.of(value.split(" :lore ")[1].split(";")[0]));
+                                }
+                                togive.setItemMeta(tgm);
+                                player.getInventory().addItem(togive);
                             }
                         });
                         return true;
