@@ -146,12 +146,12 @@ public class Compiler {
     public static ArrayList<String> findExpression(String input) {
         ArrayList<String> strings = new ArrayList<>();
         Pattern pattern = Pattern.compile("#(.*?)!");
-        Matcher matcher = pattern.matcher(input);
+        Matcher matcher = pattern.matcher(input.replace("\n", "").replace("\r", ""));
 
         while (matcher.find()) {
             String extracted = matcher.group(1);
             String replace = extracted.replaceFirst("#", "").replace("!", "")
-                    .replace("\n", "");
+                    .replace("\n", "").replace("\r", "");
             strings.add(replace);
             Bukkit.getLogger().info(replace);
         }
