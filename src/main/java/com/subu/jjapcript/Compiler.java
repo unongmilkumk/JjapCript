@@ -30,9 +30,7 @@ public class Compiler {
                 Main.cm.register(jjapcript.text1.replaceFirst("/", ""), new Command(jjapcript.text1.replaceFirst("/", "")) {
                     @Override
                     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-                        findExpression(jjapcript.code).forEach(value -> {
-                            runCode(value.replace("=sender", sender.getName()));
-                        });
+                        findExpression(jjapcript.code).forEach(value -> runCode(value.replace("=sender", sender.getName())));
                         return true;
                     }
                 });
