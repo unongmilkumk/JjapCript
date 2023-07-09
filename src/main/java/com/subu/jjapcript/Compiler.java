@@ -16,6 +16,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Compiler {
+    /**
+     * compile code and command or event it
+     * @param code code to compile
+     * @since version 0.1
+     */
     public static void compile(String code) {
         ArrayList<Jjapcript> jjapcripts = splitCode(code);
         for (Jjapcript jjapcript : jjapcripts) {
@@ -26,85 +31,74 @@ public class Compiler {
                     @Override
                     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
                         findExpression(jjapcript.code).forEach(value -> {
-                            if (value.startsWith("log ")) {
-                                Bukkit.getLogger().info(value.replaceFirst("log ", ""));
-                            } else if (value.startsWith("give ")) {
-                                Player player = null;
-                                if (!value.split(" ")[1].equals("=sender")) {
-                                    player = Bukkit.getPlayer(value.split(" ")[1]);
-                                } else if (sender instanceof Player) {
-                                    player = (Player) sender;
-                                }
-                                ItemStack togive = new ItemStack(Material.getMaterial(value.split(" ")[2]));
-                                ItemMeta tgm = togive.getItemMeta();
-                                if (value.contains(" :name ") && value.split(" :name ")[1].contains(";")) {
-                                    tgm.setDisplayName(value.split(" :name ")[1].split(";")[0]);
-                                }
-                                if (value.contains(" :description ") && value.split(" :description ")[1].contains(";")) {
-                                    tgm.setLore(List.of(value.split(" :description ")[1].split(";")[0]));
-                                }
-                                if (value.contains(" :lore ") && value.split(" :lore ")[1].contains(";")) {
-                                    tgm.setLore(List.of(value.split(" :lore ")[1].split(";")[0]));
-                                }
-                                if (value.contains(" :ench ") && value.split(" :ench ")[1].contains(";")) {
-                                    String enchantmentValue = value.split(" :ench ")[1].split(";")[0];
-                                    String[] enchantmentData = enchantmentValue.split(" ");
-                                    if (enchantmentData.length == 2) {
-                                        String enchantmentType = enchantmentData[0];
-                                        int enchantmentLevel = Integer.parseInt(enchantmentData[1]);
-                                        Enchantment enchantment = EnchantmentWrapper.getByName(enchantmentType.toUpperCase());
-                                        if (enchantment != null) {
-                                            tgm.addEnchant(enchantment, enchantmentLevel, true);
-                                        }
-                                    }
-                                }
-                                if (value.contains(" :unbreakable ") && value.split(" :unbreakable ")[1].contains(";")) {
-                                    String unbreakableValue = value.split(" :unbreakable ")[1].split(";")[0];
-                                    boolean isUnbreakable = Boolean.parseBoolean(unbreakableValue);
-                                    tgm.setUnbreakable(isUnbreakable);
-                                }
-                                if (value.contains(" :hideflag ") && value.split(" :hideflag ")[1].contains(";")) {
-                                    String hideFlagValue = value.split(" :hideflag ")[1].split(";")[0];
-                                    String[] flagsToHide = hideFlagValue.split(",");
-                                    for (String flagName : flagsToHide) {
-                                        try {
-                                            ItemFlag flag = ItemFlag.valueOf(flagName.toUpperCase());
-                                            tgm.addItemFlags(flag);
-                                        } catch (IllegalArgumentException e) {
-                                            Bukkit.getLogger().info("올바르지 않은 Jjapcript HideFlag Naming");
-                                        }
-                                    }
-                                }
-                                togive.setItemMeta(tgm);
-                                player.getInventory().addItem(togive);
-                            } else if (value.startsWith("clear")) {
-                                Player player = null;
-                                if (!value.split(" ")[1].equals("=sender")) {
-                                    player = Bukkit.getPlayer(value.split(" ")[1]);
-                                } else if (sender instanceof Player) {
-                                    player = (Player) sender;
-                                }
-                                if (value.contains(" :material ") && value.split(" :material ")[1].contains(";")) {
-                                    player.getInventory().remove(Material.getMaterial(value.split(" :material ")[1].split(";")[0].toUpperCase()));
-                                } else if (!value.contains(" :material ")) {
-                                    player.getInventory().clear();
-                                }
-                            } else if (value.startsWith("broadcast")) {
-                                Bukkit.broadcastMessage(value.replaceFirst("broadcast ", ""));
-                            } else if (value.startsWith("send")) {
-                                Player player = null;
-                                if (!value.split(" ")[1].equals("=sender")) {
-                                    player = Bukkit.getPlayer(value.split(" ")[1]);
-                                } else if (sender instanceof Player) {
-                                    player = (Player) sender;
-                                }
-                                player.sendMessage(value.replaceFirst("broadcast " + value.split(" ")[1] + " ", ""));
-                            }
+                            runCode(value.replace("=sender", sender.getName()));
                         });
                         return true;
                     }
                 });
             }
+        }
+    }
+
+    public static void runCode(String value) {
+        if (value.startsWith("log ")) {
+            Bukkit.getLogger().info(value.replaceFirst("log ", ""));
+        } else if (value.startsWith("give ")) {
+            Player player = Bukkit.getPlayer(value.split(" ")[1]);
+            ItemStack togive = new ItemStack(Material.getMaterial(value.split(" ")[2]));
+            ItemMeta tgm = togive.getItemMeta();
+            if (value.contains(" :name ") && value.split(" :name ")[1].contains(";")) {
+                tgm.setDisplayName(value.split(" :name ")[1].split(";")[0]);
+            }
+            if (value.contains(" :description ") && value.split(" :description ")[1].contains(";")) {
+                tgm.setLore(List.of(value.split(" :description ")[1].split(";")[0]));
+            }
+            if (value.contains(" :lore ") && value.split(" :lore ")[1].contains(";")) {
+                tgm.setLore(List.of(value.split(" :lore ")[1].split(";")[0]));
+            }
+            if (value.contains(" :ench ") && value.split(" :ench ")[1].contains(";")) {
+                String enchantmentValue = value.split(" :ench ")[1].split(";")[0];
+                String[] enchantmentData = enchantmentValue.split(" ");
+                if (enchantmentData.length == 2) {
+                    String enchantmentType = enchantmentData[0];
+                    int enchantmentLevel = Integer.parseInt(enchantmentData[1]);
+                    Enchantment enchantment = EnchantmentWrapper.getByName(enchantmentType.toUpperCase());
+                    if (enchantment != null) {
+                        tgm.addEnchant(enchantment, enchantmentLevel, true);
+                    }
+                }
+            }
+            if (value.contains(" :unbreakable ") && value.split(" :unbreakable ")[1].contains(";")) {
+                String unbreakableValue = value.split(" :unbreakable ")[1].split(";")[0];
+                boolean isUnbreakable = Boolean.parseBoolean(unbreakableValue);
+                tgm.setUnbreakable(isUnbreakable);
+            }
+            if (value.contains(" :hideflag ") && value.split(" :hideflag ")[1].contains(";")) {
+                String hideFlagValue = value.split(" :hideflag ")[1].split(";")[0];
+                String[] flagsToHide = hideFlagValue.split(",");
+                for (String flagName : flagsToHide) {
+                    try {
+                        ItemFlag flag = ItemFlag.valueOf(flagName.toUpperCase());
+                        tgm.addItemFlags(flag);
+                    } catch (IllegalArgumentException e) {
+                        Bukkit.getLogger().info("올바르지 않은 Jjapcript HideFlag Naming");
+                    }
+                }
+            }
+            togive.setItemMeta(tgm);
+            player.getInventory().addItem(togive);
+        } else if (value.startsWith("clear")) {
+            Player player = Bukkit.getPlayer(value.split(" ")[1]);
+            if (value.contains(" :material ") && value.split(" :material ")[1].contains(";")) {
+                player.getInventory().remove(Material.getMaterial(value.split(" :material ")[1].split(";")[0].toUpperCase()));
+            } else if (!value.contains(" :material ")) {
+                player.getInventory().clear();
+            }
+        } else if (value.startsWith("broadcast")) {
+            Bukkit.broadcastMessage(value.replaceFirst("broadcast ", ""));
+        } else if (value.startsWith("send")) {
+            Player player = Bukkit.getPlayer(value.split(" ")[1]);
+            player.sendMessage(value.replaceFirst("send " + value.split(" ")[1] + " ", ""));
         }
     }
 
