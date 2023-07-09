@@ -4,7 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -36,10 +39,41 @@ public class Compiler {
                                 ItemMeta tgm = togive.getItemMeta();
                                 if (value.contains(" :name ") && value.split(" :name ")[1].contains(";")) {
                                     tgm.setDisplayName(value.split(" :name ")[1].split(";")[0]);
-                                } else if (value.contains(" :description ") && value.split(" :description ")[1].contains(";")) {
+                                }
+                                if (value.contains(" :description ") && value.split(" :description ")[1].contains(";")) {
                                     tgm.setLore(List.of(value.split(" :description ")[1].split(";")[0]));
-                                } else if (value.contains(" :lore ") && value.split(" :lore ")[1].contains(";")) {
+                                }
+                                if (value.contains(" :lore ") && value.split(" :lore ")[1].contains(";")) {
                                     tgm.setLore(List.of(value.split(" :lore ")[1].split(";")[0]));
+                                }
+                                if (value.contains(" :ench ") && value.split(" :ench ")[1].contains(";")) {
+                                    String enchantmentValue = value.split(" :ench ")[1].split(";")[0];
+                                    String[] enchantmentData = enchantmentValue.split(" ");
+                                    if (enchantmentData.length == 2) {
+                                        String enchantmentType = enchantmentData[0];
+                                        int enchantmentLevel = Integer.parseInt(enchantmentData[1]);
+                                        Enchantment enchantment = EnchantmentWrapper.getByName(enchantmentType.toUpperCase());
+                                        if (enchantment != null) {
+                                            tgm.addEnchant(enchantment, enchantmentLevel, true);
+                                        }
+                                    }
+                                }
+                                if (value.contains(" :unbreakable ") && value.split(" :unbreakable ")[1].contains(";")) {
+                                    String unbreakableValue = value.split(" :unbreakable ")[1].split(";")[0];
+                                    boolean isUnbreakable = Boolean.parseBoolean(unbreakableValue);
+                                    tgm.setUnbreakable(isUnbreakable);
+                                }
+                                if (value.contains(" :hideflag ") && value.split(" :hideflag ")[1].contains(";")) {
+                                    String hideFlagValue = value.split(" :hideflag ")[1].split(";")[0];
+                                    String[] flagsToHide = hideFlagValue.split(",");
+                                    for (String flagName : flagsToHide) {
+                                        try {
+                                            ItemFlag flag = ItemFlag.valueOf(flagName.toUpperCase());
+                                            tgm.addItemFlags(flag);
+                                        } catch (IllegalArgumentException e) {
+                                            Bukkit.getLogger().info("올바르지 않은 Jjapcript HideFlag Naming");
+                                        }
+                                    }
                                 }
                                 togive.setItemMeta(tgm);
                                 player.getInventory().addItem(togive);
@@ -111,11 +145,16 @@ public class Compiler {
      */
     public static ArrayList<String> findExpression(String input) {
         ArrayList<String> strings = new ArrayList<>();
-        input.lines().forEach(line -> {
-            if (line.startsWith("#")) {
-                strings.add(line.replaceFirst("#", ""));
-            }
-        });
+        Pattern pattern = Pattern.compile("#(.*?)!");
+        Matcher matcher = pattern.matcher(input);
+
+        while (matcher.find()) {
+            String extracted = matcher.group(1);
+            String replace = extracted.replaceFirst("#", "").replace("!", "")
+                    .replace("\n", "");
+            strings.add(replace);
+            Bukkit.getLogger().info(replace);
+        }
         return strings;
     }
 }
