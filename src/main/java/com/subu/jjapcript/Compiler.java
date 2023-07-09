@@ -77,6 +77,28 @@ public class Compiler {
                                 }
                                 togive.setItemMeta(tgm);
                                 player.getInventory().addItem(togive);
+                            } else if (value.startsWith("clear")) {
+                                Player player = null;
+                                if (!value.split(" ")[1].equals("=sender")) {
+                                    player = Bukkit.getPlayer(value.split(" ")[1]);
+                                } else if (sender instanceof Player) {
+                                    player = (Player) sender;
+                                }
+                                if (value.contains(" :material ") && value.split(" :material ")[1].contains(";")) {
+                                    player.getInventory().remove(Material.getMaterial(value.split(" :material ")[1].split(";")[0].toUpperCase()));
+                                } else if (!value.contains(" :material ")) {
+                                    player.getInventory().clear();
+                                }
+                            } else if (value.startsWith("broadcast")) {
+                                Bukkit.broadcastMessage(value.replaceFirst("broadcast ", ""));
+                            } else if (value.startsWith("send")) {
+                                Player player = null;
+                                if (!value.split(" ")[1].equals("=sender")) {
+                                    player = Bukkit.getPlayer(value.split(" ")[1]);
+                                } else if (sender instanceof Player) {
+                                    player = (Player) sender;
+                                }
+                                player.sendMessage(value.replaceFirst("broadcast " + value.split(" ")[1] + " ", ""));
                             }
                         });
                         return true;
