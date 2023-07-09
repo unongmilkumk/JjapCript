@@ -7,6 +7,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -102,10 +104,29 @@ public class Compiler {
             Player player = Bukkit.getPlayer(value.split(" ")[1]);
             if (value.contains(" :location ") && value.split(" :location ")[1].contains(";")) {
                 String[] locData = value.split(" :location ")[1].split(";")[0].split(" ");
-                player.teleport(new Location(Bukkit.getWorld(locData[1]), Integer.parseInt(locData[2]),
-                        Integer.parseInt(locData[3]), Integer.parseInt(locData[4])));
+                player.teleport(new Location(Bukkit.getWorld(locData[0]), Integer.parseInt(locData[1]),
+                        Integer.parseInt(locData[2]), Integer.parseInt(locData[3])));
             } else if (value.contains(" :target ") && value.split(" :target ")[1].contains(";")) {
                 player.teleport(Bukkit.getPlayer(value.split(" :target ")[1].split(";")[0]));
+            }
+        } else if (value.startsWith("summon")) {
+            EntityType et = EntityType.valueOf(value.split(" ")[1]);
+            Location loc = null;
+            if (value.contains(" :location ") && value.split(" :location ")[1].contains(";")) {
+                String[] locData = value.split(" :location ")[1].split(";")[0].split(" ");
+                loc = new Location(Bukkit.getWorld(locData[0]), Integer.parseInt(locData[1]),
+                        Integer.parseInt(locData[2]), Integer.parseInt(locData[3]));
+            } else if (value.contains(" :player ") && value.split(" :player ")[1].contains(";")) {
+                loc = Bukkit.getPlayer(value.split(" :player ")[1].split(";")[0]).getLocation();
+            }
+            Entity entity = loc.getWorld().spawnEntity(loc, et);
+            if (value.contains(" :nogravity ") && value.split(" :nogravity ")[1].contains(";")) {
+                entity.setGravity(!Boolean.parseBoolean(value.split(" :nogravity ")[1].split(";")[0]));
+            }
+            if (value.contains(" :tag ") && value.split(" :tag ")[1].contains(";")) {
+                for (String s : (value.split(" :tag ")[1].split(";")[0].split(","))) {
+                    entity.addScoreboardTag(s);
+                }
             }
         }
     }
